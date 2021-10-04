@@ -1,0 +1,110 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+## Part Zero
+
+Completed
+
+```{r}
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+#install.packages('readXl')
+data1 <- readxl::read_xls("C:\\Users\\samue\\OneDrive\\Documents\\GSS.xls")
+data1
+```
+
+
+## Question 1
+
+Find the average years of education for the respondents with each marital status. Arrange your output in a meaningful order and print. Describe any patterns you find.
+
+Patterns: After getting the data and arranging it in the descending order, it was interesting to see that the population that selected to not
+answer had the highest education status. After that there is a group of 3 within 0.4 years, which would be Never married, Divorced, or Married. The lowest mean Education are people that answered Widowed. The differenct between the averages is 4.3.
+
+```{r cars}
+data1 %>%
+  mutate(`Highest year of school completed` = as.numeric(`Highest year of school completed`)) %>%
+  group_by(`Marital status`) %>%
+  summarize(meanEdu = mean(`Highest year of school completed`, na.rm=TRUE)) %>%
+  arrange(desc(meanEdu))
+
+```
+
+
+## Question 2
+
+Create a single data frame containing records for the better educated respondents with each marital status. A “better educated” respondent is someone who has strictly more years of education than the average among those with the same marital status. Print the structure of the data frame.
+
+```{r}
+data3  <- filter(data1, `Marital status` == 'No answer' & `Highest year of school completed` > 15.5 | `Marital status` == 'Never married' & `Highest year of school completed` > 13.4 | `Marital status` == 'Divorced' & `Highest year of school completed` > 13.1 | `Marital status` == 'Married' & `Highest year of school completed` > 13.0 | `Marital status` == 'Separated' & `Highest year of school completed` > 11.9 | `Marital status` == 'Widowed' & `Highest year of school completed` > 11.2)
+  
+
+```
+
+## Question 3
+
+How is the happiness of a respondent related to his/her marriage status? Define that a person is happy if the response to question is “Very happy” or “Pretty happy”.
+
+```{r}
+data4 <-data1 %>% 
+  filter(`General happiness` %in% c('Very happy', 'Pretty happy', 'Not too happy')) %>%
+  mutate(HappyOrNot = (`General happiness` %in% c('very happy', 'Pretty happy'))) %>%
+  select(`General happiness`, `Marital status` , HappyOrNot)
+
+
+p <- ggplot(data = data4, aes(x = `Marital status`, fill = as.factor(`Marital status`)))+geom_bar()+facet_grid(. ~HappyOrNot)
+p + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))+ xlab("Martial Status")+ylab("Count of Martial Status")+ggtitle("Comparison Between Marriage Staus and Happiness")
+
+table(data4$HappyOrNot)
+
+happy <- (33563/(26491+33563))*100
+happy
+
+unhappy <- 100 - happy
+unhappy
+```
+
+Response: One of the most important things to understand when looking at the data is what my numerical summary is showing. Looking at the population as a hole in terms of the variables of being happy and unhappy is important. The percentage of people that are deemed to be happy, decided by the criteria of the question is at 55.88803%. This is something important to look at when going to forward because it helps us understand that there is actually more people that are happy than unhappy in this data set. The numbers represented by the overall population can be hard to denote from the visual representation sometimes. The visual representation that I created which is a side-by-side bar chart helps us look at the breakdown of the population by if they are happy or not as well as their martial status. The first thing that you see is that there are so many more people that responded that are married than another categories combined. The other glaring thing is that there is a large difference between people who have never been married. As you can see the green bar in the TRUE categories, which means that they are happy, is about 2,500 people hire than the people that answer unhappy.
+
+
+## Question 4
+
+Does party affiliation affect the relationship you found in the last question?
+
+*I assume that you are talking about the relationship between being happy and party affiliation instead of marriage status in the previous question.
+
+
+```{r}
+data5 <-data1 %>% 
+  filter(`General happiness` %in% c('Very happy', 'Pretty happy', 'Not too happy')) %>%
+  mutate(HappyOrNot = (`General happiness` %in% c('very happy', 'Pretty happy'))) %>%
+  select(`General happiness`, `Political party affiliation` , HappyOrNot)
+
+q <- ggplot(data = data5, aes(x = `Political party affiliation`, fill = as.factor(`Political party affiliation`)))+geom_bar()+facet_grid(. ~HappyOrNot)
+q + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))+ xlab("Political party affiliation")+ylab("Count of Political party affiliation")+ggtitle("Comparison Between Political Party Affiliation and Happiness")
+
+table(data1$`Political party affiliation`)
+
+```
+
+Response: When looking at the visual representation that I created to see the differentiation to between peoples party affiliation and their happiness, you can see that there are some large differences. One of the most interesting findings that I was able to see is that the farthest right column, "Strong Republic" almost has the exact amount for both people that are happy and not happy. Another obvious statistic was the difference between not strong democrat, There is about 2000 people difference between people that are happy and people that are unhappy. This is the largest disparity of the visual representation. In general you can see that when you move from "FALSE", which is not happy, to "TRUE" there is a small jump in each of the categories. When looking at the numerical summary of the breakdown between all of the different answers in each category. This allows to create a breakdown of the population as whole, for instance, "Not str democrat" is 20.511%.
+
+
+## Question 5
+
+Explore an interesting question (not covered by the previous questions), and answer the question using the GSS data.
+
+Question: What is the difference between Sex and party affiliation.
+```{r}
+s <- ggplot(data = data1, aes(x = `Political party affiliation`, fill = as.factor(`Political party affiliation`)))+geom_bar()+facet_grid(. ~`Respondents sex`)
+s + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))+ xlab("Political party affiliation")+ylab("Count of Political party affiliation")+ggtitle("Comparison Between Political Party Affiliation and Respondents Sex")
+
+table(data1$`Respondents sex`)
+
+
+```
+
+Response: This visual representation shows the difference between Political Party Affiliation and what Sex they define as. When looking at the general visual representation, you can see that more woman responded to the survey comparative to males. You can see in the numerical analysis that Females out numbered Males by 7,586 people. Another analysis that I am making is when looking at Strong Republican like the last problem stayed similar as well. When looking at the last question as well it was the same, I would like to dive deeper into the data of how that breaks down between the relationship if Male and Female is related to being Happy or Not. Both graphs have semi-normal distribution in the bar plot.
